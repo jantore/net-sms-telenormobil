@@ -3,8 +3,10 @@ package Net::SMS::TelenorMobil;
 use warnings;
 use strict;
 
+our $VERSION = '0.01';
+
 use Carp;
-require LWP::UserAgent;
+use LWP::UserAgent;
 
 use constant {
     URL_FRONT   => 'https://telenormobil.no/',
