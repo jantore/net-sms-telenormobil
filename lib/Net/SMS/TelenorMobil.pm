@@ -59,7 +59,7 @@ sub login {
         );
     
     unless($res->code() == 302 || $res->header("Location") =~ m"^login.do") {
-	croak("Login failed. Check password and try again. Response status code: " . $res->code());
+        croak("Login failed. Check password and try again. Response status code: " . $res->code());
     }
 
 
@@ -100,11 +100,11 @@ sub send {
         );
 
     unless($res->code == 200) {
-	croak("Failed to send message. Status: " . $res->status_line);
+        croak("Failed to send message. Status: " . $res->status_line);
     }
 
     unless ($res->content =~ m"Meldingen er sendt") {
-	croak("Proably failed to send message.")
+        croak("Proably failed to send message.")
     }
 
     return 1;
@@ -137,11 +137,11 @@ sub _get_token {
     ##
     my $res = $ua->get(URL_COMPOSE);
     unless($res->code() == 200) {
-	croak("Failed to get page containing the org.apache.struts.taglib.html.TOKEN value");
+        croak("Failed to get page containing the org.apache.struts.taglib.html.TOKEN value");
     }
 
     unless($res->content() =~ /<input type="hidden" name="org.apache.struts.taglib.html.TOKEN" value="([^\"]*)">/) {
-	croak("SMS page did not contain the org.apache.struts.taglib.html.TOKEN value.");
+        croak("SMS page did not contain the org.apache.struts.taglib.html.TOKEN value.");
     }
 
     return $1;
