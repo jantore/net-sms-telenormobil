@@ -7,11 +7,11 @@ use Carp;
 require LWP::UserAgent;
 
 use constant {
-    URL_FRONT   => 'http://telenormobil.no/',
-    URL_LOGIN   => 'http://telenormobil.no/minesider/login.do',
-    URL_COMPOSE => 'http://telenormobil.no/ums/compose/sms.do',
-    URL_SEND    => 'http://telenormobil.no/ums/compose/sms/process.do',
-    URL_LOGOUT  => 'http://telenormobil.no/minesider/logout.do',
+    URL_FRONT   => 'https://telenormobil.no/',
+    URL_LOGIN   => 'https://telenormobil.no/minesider/login.do',
+    URL_COMPOSE => 'https://telenormobil.no/ums/compose/sms.do',
+    URL_SEND    => 'https://telenormobil.no/ums/compose/sms/process.do',
+    URL_LOGOUT  => 'https://telenormobil.no/minesider/logout.do',
 };
 
 sub new {
