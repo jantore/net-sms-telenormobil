@@ -12,7 +12,8 @@ use constant {
     URL_FRONT   => 'https://telenormobil.no/',
     URL_LOGIN   => 'https://telenormobil.no/minesider/login.do',
     URL_COMPOSE => 'https://telenormobil.no/ums/compose/sms.do',
-    URL_SEND    => 'https://telenormobil.no/ums/compose/sms/process.do',
+    URL_PROCESS => 'https://telenormobil.no/ums/compose/sms/process.do',
+    URL_SEND    => 'https://telenormobil.no/ums/compose/send.do',
     URL_LOGOUT  => 'https://telenormobil.no/minesider/logout.do',
 };
 
@@ -35,7 +36,7 @@ sub login {
     $ua->timeout(30);
     $ua->env_proxy;
     $ua->cookie_jar( {} );
-    
+
     ###
     # A simple request to fetch cookies.
     ##
@@ -90,7 +91,7 @@ sub send {
     # Send the message.
     ##
     my $res = $ua->post(
-        URL_SEND,
+        URL_PROCESS,
         [
 #         'org.apache.struts.taglib.html.TOKEN' => $token,
          'toAddress'                           => $destination,
@@ -101,12 +102,19 @@ sub send {
         ]
         );
 
-    unless($res->code == 200) {
+    unless($res->code == 200 || $res->code == 302) {
         croak("Failed to send message. Status: " . $res->status_line);
     }
 
+    ###
+    # Message isn't actually sent until we redirect.
+    ##
+    if($res->code == 302) {
+        $res = $ua->get(URL_SEND);
+    }
+
     unless ($res->content =~ m"Meldingen er sendt") {
-        croak("Proably failed to send message.")
+        croak("Probably failed to send message.")
     }
 
     return 1;
