@@ -82,18 +82,11 @@ sub send {
 
 
     ###
-    # Get token from SMS form page (disabled, no longer required).
-    ##
-    #my $token = $self->_get_token();
-
-
-    ###
     # Send the message.
     ##
     my $res = $ua->post(
         URL_PROCESS,
         [
-#         'org.apache.struts.taglib.html.TOKEN' => $token,
          'toAddress'                           => $destination,
          'message'                             => $message,
          'multipleMessages'                    => "true",
@@ -134,25 +127,4 @@ sub logout {
 
     $self->{'ua'} = undef;
     return 1;
-}
-
-
-sub _get_token {
-    my ($self) = @_;
-    my $ua = $self->{'ua'};
-
-
-    ###
-    # Get token from SMS form page.
-    ##
-    my $res = $ua->get(URL_COMPOSE);
-    unless($res->code() == 200) {
-        croak("Failed to get page containing the org.apache.struts.taglib.html.TOKEN value");
-    }
-
-    unless($res->content() =~ /<input type="hidden" name="org.apache.struts.taglib.html.TOKEN" value="([^\"]*)">/) {
-        croak("SMS page did not contain the org.apache.struts.taglib.html.TOKEN value.");
-    }
-
-    return $1;
 }
