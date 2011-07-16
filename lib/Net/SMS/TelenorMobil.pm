@@ -9,12 +9,11 @@ use Carp;
 use LWP::UserAgent;
 
 use constant {
-    URL_FRONT   => 'https://telenormobil.no/',
+    URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginnfelles.cms',
     URL_LOGIN   => 'https://telenormobil.no/minesider/login.do',
-    URL_COMPOSE => 'https://telenormobil.no/ums/compose/sms.do',
-    URL_PROCESS => 'https://telenormobil.no/ums/compose/sms/process.do',
-    URL_SEND    => 'https://telenormobil.no/ums/compose/send.do',
-    URL_LOGOUT  => 'https://telenormobil.no/minesider/logout.do',
+    URL_PROCESS => 'https://telenormobil.no/norm/telenor/sms/send/process.do',
+    URL_SHOW    => 'https://telenormobil.no/norm/telenor/sms/send/result/show.do',
+    URL_LOGOUT  => 'https://telenormobil.no/norm/telenor/sms/logout.do',
 };
 
 sub new {
@@ -100,10 +99,10 @@ sub send {
     }
 
     ###
-    # Message isn't actually sent until we redirect.
+    # We need to redirect to get the results of the send attempt.
     ##
     if($res->code == 302) {
-        $res = $ua->get(URL_SEND);
+        $res = $ua->get(URL_SHOW);
     }
 
     unless ($res->content =~ m"Meldingen er sendt") {
