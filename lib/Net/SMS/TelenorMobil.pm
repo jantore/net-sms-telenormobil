@@ -7,6 +7,7 @@ our $VERSION = '0.01';
 
 use Carp;
 use LWP::UserAgent;
+use Mojo::DOM;
 
 use constant {
     URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginnfelles.cms',
@@ -105,9 +106,20 @@ sub send {
         $res = $ua->get(URL_SHOW);
     }
 
-    unless ($res->content =~ m"Meldingen er sendt") {
-        croak("Probably failed to send message.")
-    }
+    my $dom = Mojo::DOM->new->parse($res->content);
+    my $rows = $dom->find('div.section > div.elegant > table > tbody > tr');
+
+    my @result = map {
+        {
+            name   => $_->td->[0]->text,
+            status => ($_->td->[1]->text =~ /^Sendt/) ? 1 : 0
+        }
+    } $rows->each;
+
+    croak("No send attempts found on result page (site format changed?)") if scalar(@result) == 0;
+
+    return @result if wantarray;
+    return 0       if grep { $_->{status} == 0 } @result;
 
     return 1;
 }
