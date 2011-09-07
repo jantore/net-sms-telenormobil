@@ -139,3 +139,5 @@ sub logout {
     $self->{'ua'} = undef;
     return 1;
 }
+
+1;
