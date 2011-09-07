@@ -3,18 +3,19 @@ package Net::SMS::TelenorMobil;
 use warnings;
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.2.0';
 
 use Carp;
 use LWP::UserAgent;
 use Mojo::DOM;
 
 use constant {
-    URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginnfelles.cms',
-    URL_LOGIN   => 'https://telenormobil.no/minesider/login.do',
-    URL_PROCESS => 'https://telenormobil.no/norm/telenor/sms/send/process.do',
-    URL_SHOW    => 'https://telenormobil.no/norm/telenor/sms/send/result/show.do',
-    URL_LOGOUT  => 'https://telenormobil.no/norm/telenor/sms/logout.do',
+    URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginn.cms',
+    URL_LOGIN   => 'https://www.telenor.no/privat/minesider/auth/login.action',
+    URL_INIT_UMS => 'https://www.telenor.no/privat/minesider/abonnement/mobil/umstjeneste/initUmsTjeneste.cms?setCurrentLocationToReturnOfFlow=true&umsUrl=SEND_SMS',
+    URL_PROCESS => 'https://telenormobil.no/norm/win/sms/send/process.do',
+    URL_SHOW    => 'https://telenormobil.no/norm/win/sms/send/result/show.do',
+    URL_LOGOUT  => 'https://telenormobil.no/norm/win/sms/logout.do',
 };
 
 sub new {
@@ -46,25 +47,27 @@ sub login {
         croak("Failed to get cookies. Request status: " . $res->code());
     }
 
-
     ###
     # Log in to the system.
     ##
     $res = $ua->post(
         URL_LOGIN,
         [
-         'fromweb'    => "undefined",
-         'j_username' => $username,
-         'j_password' => $password,
-         'image1.x'   => 14,
-         'image1.y'   => 5
+            'usr_name'     => $username,
+            'usr_password' => $password,
         ]
-        );
-    
-    unless($res->code() == 302 || $res->header("Location") =~ m"^login.do") {
+    );
+
+    # login.action redirects to the following on failure/success, respectively:
+    # - https://www.telenor.no/privat/minesider/logginn.cms?submitted=true
+    # - https://www.telenor.no/privat/minesider/minside/minSide.cms
+    unless($res->code() == 302 || $res->header("Location") =~ m{logginn\.cms}) {
         croak("Login failed. Check password and try again. Response status code: " . $res->code());
     }
 
+    # Go through a bunch of redirects to get token for telenormobil.no and
+    # fetch cookies.
+    $res = $ua->get(URL_INIT_UMS);
 
     ###
     # Assuming success.
@@ -80,20 +83,17 @@ sub send {
 
     $destination = join(', ', @{ $destination }) if (ref($destination) eq 'ARRAY');
 
-
     ###
     # Send the message.
     ##
     my $res = $ua->post(
         URL_PROCESS,
         [
-         'toAddress'                           => $destination,
-         'message'                             => $message,
-         'multipleMessages'                    => "true",
-         "b_send.x"                            => "32",
-         "b_send.y"                            => "7",
+            'toAddress' => $destination,
+            'message'   => $message,
+            'b_send'    => "b_send",
         ]
-        );
+    );
 
     unless($res->code == 200 || $res->code == 302) {
         croak("Failed to send message. Status: " . $res->status_line);
