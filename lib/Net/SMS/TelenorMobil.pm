@@ -10,8 +10,8 @@ use LWP::UserAgent;
 use Mojo::DOM;
 
 use constant {
-    URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginn.cms',
-    URL_LOGIN   => 'https://www.telenor.no/privat/minesider/auth/login.action',
+    URL_FRONT   => 'https://www.telenor.no/privat/minesider/logginnfelles.cms',
+    URL_LOGIN   => 'https://www.telenor.no/privat/minesider/auth/login',
     URL_INIT_UMS => 'https://www.telenor.no/privat/minesider/abonnement/mobil/umstjeneste/initUmsTjeneste.cms?setCurrentLocationToReturnOfFlow=true&umsUrl=SEND_SMS',
     URL_PROCESS => 'https://telenormobil.no/norm/win/sms/send/process.do',
     URL_SHOW    => 'https://telenormobil.no/norm/win/sms/send/result/show.do',
@@ -61,7 +61,7 @@ sub login {
     # login.action redirects to the following on failure/success, respectively:
     # - https://www.telenor.no/privat/minesider/logginn.cms?submitted=true
     # - https://www.telenor.no/privat/minesider/minside/minSide.cms
-    unless($res->code() == 302 || $res->header("Location") =~ m{logginn\.cms}) {
+    if($res->code() == 302 && $res->header("Location") =~ m{logginnfelles\.cms}) {
         croak("Login failed. Check password and try again. Response status code: " . $res->code());
     }
 
