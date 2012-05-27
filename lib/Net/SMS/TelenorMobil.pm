@@ -33,7 +33,6 @@ sub login {
     my ($self, $username, $password) = @_;
 
     my $ua = LWP::UserAgent->new;
-    $ua->agent("");
     $ua->timeout(30);
     $ua->env_proxy;
     $ua->cookie_jar( {} );
